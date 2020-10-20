@@ -15,33 +15,30 @@ suspend fun main() = Korge(
         bgcolor = GameColors.SCREEN_BACKGROUND
 ) {
     val font = GameConfig.FONT_FILE.readBitmapFont()
-    val boardWidth = (views.virtualWidth - (Dimensions.BOARD_MARGIN * 2))
-    val boardMarginTop = Dimensions.SCREEN_HEIGHT - boardWidth - Dimensions.BOARD_MARGIN
-    val totalSpacing = (GameConfig.BOARD_WIDTH_IN_CELLS + 1) * Dimensions.CELL_SPACING
-    val cellWidth = (boardWidth - totalSpacing) / GameConfig.BOARD_WIDTH_IN_CELLS.toDouble()
-    val titleWidth = cellWidth
+    val titleWidth = Dimensions.CELL_WIDTH
     val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - titleWidth) / 2
-    val scoreHeight = cellWidth * 0.8
 
     val boardRect = roundRect(
-            boardWidth,
-            boardWidth,
+            Dimensions.BOARD_WIDTH,
+            Dimensions.BOARD_WIDTH,
             Dimensions.CORNER_RADIUS,
             color = GameColors.BOARD_BACKGROUND) {
-        position(Dimensions.BOARD_MARGIN, boardMarginTop)
+        centerXOnStage()
+        alignBottomToBottomOf(this@Korge, Dimensions.BOARD_MARGIN)
     }
 
     graphics {
-        position(Dimensions.BOARD_MARGIN, boardMarginTop)
+        alignLeftToLeftOf(boardRect)
+        alignTopToTopOf(boardRect)
 
         fill(GameColors.EMPTY_CELL_BACKGROUND) {
             for (row in 0 until GameConfig.BOARD_WIDTH_IN_CELLS) {
                 for (column in 0 until GameConfig.BOARD_WIDTH_IN_CELLS) {
                     with (Dimensions) {
-                        val x = CELL_SPACING + (CELL_SPACING + cellWidth) * row
-                        val y = CELL_SPACING + (CELL_SPACING + cellWidth) * column
+                        val x = CELL_SPACING + (CELL_SPACING + CELL_WIDTH) * row
+                        val y = CELL_SPACING + (CELL_SPACING + CELL_WIDTH) * column
 
-                        roundRect(x, y, cellWidth, cellWidth, CORNER_RADIUS)
+                        roundRect(x, y, CELL_WIDTH, CELL_WIDTH, CORNER_RADIUS)
                     }
                 }
             }
@@ -49,17 +46,24 @@ suspend fun main() = Korge(
     }
 
 
-    val titleRect = roundRect(cellWidth, cellWidth, Dimensions.CORNER_RADIUS, color = GameColors.TITLE_BACKGROUND) {
-        position(Dimensions.TITLE_MARGIN, Dimensions.TITLE_MARGIN)
+    val titleRect = roundRect(
+            Dimensions.CELL_WIDTH,
+            Dimensions.CELL_WIDTH,
+            Dimensions.CORNER_RADIUS,
+            color = GameColors.TITLE_BACKGROUND
+    ) {
+        alignLeftToLeftOf(boardRect)
+        alignTopToTopOf(this@Korge, Dimensions.TITLE_MARGIN)
     }.also {
         text(Strings.TITLE, Dimensions.LARGE_FONT, Colors.WHITE, font).centerOn(it)
     }
 
     val hiscoreRect = roundRect(
             scoreWidth,
-            scoreHeight,
+            Dimensions.SCORE_HEIGHT,
             Dimensions.CORNER_RADIUS,
-            color = GameColors.UI_BACKGROUND) {
+            color = GameColors.UI_BACKGROUND
+    ) {
         alignRightToRightOf(boardRect)
         alignTopToTopOf(titleRect)
     }.also {
@@ -73,9 +77,10 @@ suspend fun main() = Korge(
 
     val scoreRect = roundRect(
             scoreWidth,
-            scoreHeight,
+            Dimensions.SCORE_HEIGHT,
             Dimensions.CORNER_RADIUS,
-            color = GameColors.UI_BACKGROUND) {
+            color = GameColors.UI_BACKGROUND
+    ) {
         alignRightToLeftOf(hiscoreRect, Dimensions.SCORE_MARGIN)
         alignTopToTopOf(titleRect)
     }.also {
@@ -87,7 +92,7 @@ suspend fun main() = Korge(
                 .alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
     }
 
-    val buttonWidth = cellWidth * 0.3
+    val buttonWidth = Dimensions.BUTTON_WIDTH
     val buttonImageWidth = buttonWidth * 0.8
 
     val restartButton = container {
