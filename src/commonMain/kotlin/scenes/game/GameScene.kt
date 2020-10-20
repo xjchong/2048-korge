@@ -1,12 +1,16 @@
 package scenes.game
 
+import com.soywiz.klock.seconds
 import com.soywiz.korev.Key
+import com.soywiz.korge.animate.animateSequence
 import com.soywiz.korge.input.onKeyDown
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.format.readBitmap
+import com.soywiz.korio.async.launchImmediately
 import com.soywiz.korma.geom.vector.roundRect
+import com.soywiz.korma.interpolation.Easing
 import constants.Dimensions
 import constants.GameColors
 import constants.GameConfig
@@ -24,8 +28,11 @@ class GameScene : Scene() {
     private lateinit var restartButton: Container
     private lateinit var boardRect: RoundRect
 
-    private val board = Board()
+    private var board = Board()
+    private val blocks = mutableMapOf<BoardPosition, BlockView?>()
     private val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - Dimensions.TITLE_WIDTH) / 2
+
+    private var isAnimating: Boolean = false
 
     override suspend fun Container.sceneInit() {
         GameConfig.init()
@@ -182,15 +189,20 @@ class GameScene : Scene() {
     }
 
     private fun addRandomBlock(): Boolean {
-        val randomPosition = board.blocks.filter { it.value == null }.keys.shuffled().firstOrNull() ?: return false
+        val randomPosition = board.numberMap.filter { it.value == null }.keys.shuffled().firstOrNull() ?: return false
         val randomNumber = if (Random.nextDouble() < 0.9) 2 else 4
 
-        board.blocks[randomPosition] = BlockView(randomNumber).addTo(root).position(randomPosition)
+        addBlock(randomPosition, randomNumber)
 
         return true
     }
 
-    private fun BlockView.position(boardPosition: BoardPosition): BlockView {
+    private fun addBlock(boardPosition: BoardPosition, number: Int) {
+        blocks[boardPosition] = BlockView(number).addTo(root).position(boardPosition)
+        board.numberMap[boardPosition] = number
+    }
+
+    private fun getScreenPosition(boardPosition: BoardPosition): Pair<Double, Double> {
         val nextX = with (Dimensions) {
             boardRect.x + CELL_SPACING + (CELL_WIDTH + CELL_SPACING) * boardPosition.x
         }
@@ -199,10 +211,81 @@ class GameScene : Scene() {
             boardRect.y + CELL_SPACING + (CELL_WIDTH + CELL_SPACING) * boardPosition.y
         }
 
-        return position(nextX, nextY)
+        return Pair(nextX, nextY)
+    }
+
+    private fun BlockView.position(boardPosition: BoardPosition): BlockView {
+        val nextPosition = getScreenPosition(boardPosition)
+
+        return position(nextPosition.first, nextPosition.second)
     }
 
     private fun moveBlocks(direction: MoveDirection) {
-        println(direction)
+        if (isAnimating) return
+        if (!board.hasMovesRemaining) return
+
+        val moveChanges = board.calculateMove(direction)
+        val resultingBoard = moveChanges.resultingBoard
+
+        if (resultingBoard.numberMap == board.numberMap) {
+            return
+        } else {
+            isAnimating = true
+            root.animateMove(moveChanges) {
+                board = resultingBoard
+                addRandomBlock()
+                board.print()
+                isAnimating = false
+            }
+        }
+    }
+
+    private fun Container.animateMove(
+            moveChanges: MoveChanges,
+            onEnd: () -> Unit
+    ) = launchImmediately {
+        animateSequence {
+            val oldBlocks = blocks.toMap()
+
+            parallel {
+
+                for (move in moveChanges.moves) {
+                    val blockView = oldBlocks[move.from] ?: continue
+                    val (nextX, nextY) = getScreenPosition(move.to)
+
+                    blockView.moveTo(nextX, nextY, 0.15.seconds, Easing.LINEAR)
+                    blocks[move.from] = null
+                    blocks[move.to] = blockView
+                }
+
+                for (merge in moveChanges.merges) {
+                    val blockView1 = oldBlocks[merge.from1] ?: continue
+                    val blockView2 = oldBlocks[merge.from2] ?: continue
+                    val (nextX, nextY) = getScreenPosition(merge.to)
+
+                    sequence {
+                        parallel {
+                            blockView1.moveTo(nextX, nextY, 0.15.seconds, Easing.LINEAR)
+                            blockView2.moveTo(nextX, nextY, 0.15.seconds, Easing.LINEAR)
+                        }
+
+                        block {
+                            val nextNumber = blockView1.number * 2
+
+                            blockView1.removeFromParent()
+                            blockView2.removeFromParent()
+                            addBlock(merge.to, nextNumber)
+                        }
+
+//                        sequenceLazy {
+//                            // Animate here
+//                        }
+                    }
+                }
+            }
+            block {
+                onEnd()
+            }
+        }
     }
 }
