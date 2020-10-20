@@ -2,9 +2,11 @@ package scenes.game
 
 import com.soywiz.klock.seconds
 import com.soywiz.korev.Key
+import com.soywiz.korge.animate.Animator
 import com.soywiz.korge.animate.animateSequence
 import com.soywiz.korge.input.onKeyDown
 import com.soywiz.korge.scene.Scene
+import com.soywiz.korge.tween.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.format.readBitmap
@@ -253,7 +255,7 @@ class GameScene : Scene() {
                     val blockView = oldBlocks[move.from] ?: continue
                     val (nextX, nextY) = getScreenPosition(move.to)
 
-                    blockView.moveTo(nextX, nextY, 0.15.seconds, Easing.LINEAR)
+                    blockView.moveTo(nextX, nextY, GameConfig.MOVE_DURATION, Easing.LINEAR)
                     blocks[move.from] = null
                     blocks[move.to] = blockView
                 }
@@ -265,8 +267,8 @@ class GameScene : Scene() {
 
                     sequence {
                         parallel {
-                            blockView1.moveTo(nextX, nextY, 0.15.seconds, Easing.LINEAR)
-                            blockView2.moveTo(nextX, nextY, 0.15.seconds, Easing.LINEAR)
+                            blockView1.moveTo(nextX, nextY, GameConfig.MOVE_DURATION, Easing.LINEAR)
+                            blockView2.moveTo(nextX, nextY, GameConfig.MOVE_DURATION, Easing.LINEAR)
                         }
 
                         block {
@@ -277,9 +279,9 @@ class GameScene : Scene() {
                             addBlock(merge.to, nextNumber)
                         }
 
-//                        sequenceLazy {
-//                            // Animate here
-//                        }
+                        sequenceLazy {
+                            blocks[merge.to]?.let { animateMerge(it) }
+                        }
                     }
                 }
             }
@@ -287,5 +289,27 @@ class GameScene : Scene() {
                 onEnd()
             }
         }
+    }
+
+    private fun Animator.animateMerge(blockView: BlockView) {
+        val x = blockView.x
+        val y = blockView.y
+        val scale = blockView.scale
+
+        tween(
+                blockView::x[x - 4],
+                blockView::y[y - 4],
+                blockView::scale[scale + 0.1],
+                time = GameConfig.MERGE_DURATION,
+                easing = Easing.LINEAR
+        )
+
+        tween(
+                blockView::x[x],
+                blockView::y[y],
+                blockView::scale[scale],
+                time = GameConfig.MERGE_DURATION,
+                easing = Easing.LINEAR
+        )
     }
 }
