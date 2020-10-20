@@ -16,6 +16,7 @@ object Dimensions {
 
     const val CELL_WIDTH = 90.0
     const val CELL_SPACING = 12.0
+    const val CELL_PADDING = 8.0
 
     const val SCORE_HEIGHT = 72.0
 

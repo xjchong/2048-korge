@@ -1,12 +1,21 @@
 package constants
 
+import com.soywiz.korim.font.BitmapFont
+import com.soywiz.korim.font.readBitmapFont
 import com.soywiz.korio.file.std.resourcesVfs
+import kotlin.properties.Delegates
 
 object GameConfig {
 
     const val BOARD_WIDTH_IN_CELLS = 4
 
-    val FONT_FILE = resourcesVfs["clear_sans.fnt"]
     val RESTART_IMAGE_FILE = resourcesVfs["restart.png"]
     val UNDO_IMAGE_FILE = resourcesVfs["undo.png"]
+
+    var FONT: BitmapFont by Delegates.notNull()
+        private set
+
+    suspend fun init() {
+        FONT = resourcesVfs["clear_sans.fnt"].readBitmapFont()
+    }
 }

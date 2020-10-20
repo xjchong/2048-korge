@@ -14,7 +14,9 @@ suspend fun main() = Korge(
         height = Dimensions.SCREEN_HEIGHT,
         bgcolor = GameColors.SCREEN_BACKGROUND
 ) {
-    val font = GameConfig.FONT_FILE.readBitmapFont()
+    GameConfig.init()
+
+    val font = GameConfig.FONT
     val titleWidth = Dimensions.CELL_WIDTH
     val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - titleWidth) / 2
 
