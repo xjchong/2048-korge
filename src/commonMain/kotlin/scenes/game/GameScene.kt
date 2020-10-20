@@ -12,6 +12,7 @@ import com.soywiz.korge.tween.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.format.readBitmap
+import com.soywiz.korio.async.ObservableProperty
 import com.soywiz.korio.async.launchImmediately
 import com.soywiz.korma.geom.vector.roundRect
 import com.soywiz.korma.interpolation.Easing
@@ -33,10 +34,14 @@ class GameScene : Scene() {
     private lateinit var boardRect: RoundRect
 
     private var board = Board()
+    private var isAnimating: Boolean = false
+
+    private val score = ObservableProperty(0)
+    private val hiscore = ObservableProperty(0)
+
     private val blocks = mutableMapOf<BoardPosition, BlockView?>()
     private val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - Dimensions.TITLE_WIDTH) / 2
 
-    private var isAnimating: Boolean = false
 
     override suspend fun Container.sceneInit() {
         GameConfig.init()
@@ -102,6 +107,14 @@ class GameScene : Scene() {
     }
 
     private fun setupScoreUI() {
+        score.observe { value ->
+            if (value > hiscore.value) hiscore.update(value)
+        }
+
+        hiscore.observe {
+            // TODO: Update in storage.
+        }
+
         with (root) {
             hiscoreRect = roundRect(
                     scoreWidth,
@@ -115,9 +128,15 @@ class GameScene : Scene() {
                 text(Strings.HISCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, GameConfig.FONT)
                         .centerXOn(it)
                         .alignTopToTopOf(it, Dimensions.SCORE_PADDING)
-                text("0", Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT)
-                        .centerXOn(it)
-                        .alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
+
+                text(hiscore.value.toString(), Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT) {
+                    centerXOn(it)
+                    alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
+
+                    hiscore.observe { value ->
+                        text = value.toString()
+                    }
+                }
             }
 
             scoreRect = roundRect(
@@ -132,9 +151,14 @@ class GameScene : Scene() {
                 text(Strings.SCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, GameConfig.FONT)
                         .centerXOn(it)
                         .alignTopToTopOf(it, Dimensions.SCORE_PADDING)
-                text("0", Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT)
-                        .centerXOn(it)
-                        .alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
+                text(score.value.toString(), Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT) {
+                    centerXOn(it)
+                    alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
+
+                    score.observe { value ->
+                        text = value.toString()
+                    }
+                }
             }
         }
     }
@@ -242,6 +266,13 @@ class GameScene : Scene() {
 
         val moveChanges = board.calculateMove(direction)
         val resultingBoard = moveChanges.resultingBoard
+
+        // Add pending merged values to score (e.g., 2 + 2 = 4, add 4 to score).
+        score.update(moveChanges.merges.sumBy { merge ->
+            val blockView = blocks[merge.from1] ?: return@sumBy 0
+
+            blockView.number * 2
+        } + score.value)
 
         if (resultingBoard.numberMap == board.numberMap) {
             return
