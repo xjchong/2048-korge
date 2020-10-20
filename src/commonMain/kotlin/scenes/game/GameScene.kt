@@ -9,8 +9,10 @@ import constants.Dimensions
 import constants.GameColors
 import constants.GameConfig
 import constants.Strings
+import models.Board
 import models.BoardPosition
 import views.BlockView
+import kotlin.random.Random
 
 class GameScene : Scene() {
 
@@ -127,11 +129,16 @@ class GameScene : Scene() {
             alignRightToLeftOf(restartButton, Dimensions.BUTTON_SPACING)
         }
 
-        createNewBlock(2, BoardPosition(0, 2))
+        addRandomBlock()
     }
 
-    private fun createNewBlock(number: Int, boardPosition: BoardPosition) {
-        board.blocks[boardPosition] = BlockView(number).addTo(root).position(boardPosition)
+    private fun addRandomBlock(): Boolean {
+        val randomPosition = board.blocks.filter { it.value == null }.keys.shuffled().firstOrNull() ?: return false
+        val randomNumber = if (Random.nextDouble() < 0.9) 2 else 4
+
+        board.blocks[randomPosition] = BlockView(randomNumber).addTo(root).position(randomPosition)
+
+        return true
     }
 
     private fun BlockView.position(boardPosition: BoardPosition): BlockView {
