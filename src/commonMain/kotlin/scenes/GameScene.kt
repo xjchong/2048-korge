@@ -12,14 +12,21 @@ import constants.Strings
 
 class GameScene : Scene() {
 
+    private lateinit var titleRect: RoundRect
+    private lateinit var hiscoreRect: RoundRect
+    private lateinit var scoreRect: RoundRect
+    private lateinit var undoButton: Container
+    private lateinit var restartButton: Container
+    private lateinit var boardRect: RoundRect
+
     override suspend fun Container.sceneInit() {
         GameConfig.init()
 
-        val font = GameConfig.FONT
-        val titleWidth = Dimensions.CELL_WIDTH
-        val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - titleWidth) / 2
+        val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - Dimensions.TITLE_WIDTH) / 2
+        val buttonWidth = Dimensions.BUTTON_WIDTH
+        val buttonImageWidth = buttonWidth * 0.8
 
-        val boardRect = roundRect(
+        boardRect = roundRect(
                 Dimensions.BOARD_WIDTH,
                 Dimensions.BOARD_WIDTH,
                 Dimensions.CORNER_RADIUS,
@@ -46,8 +53,7 @@ class GameScene : Scene() {
             }
         }
 
-
-        val titleRect = roundRect(
+        titleRect = roundRect(
                 Dimensions.CELL_WIDTH,
                 Dimensions.CELL_WIDTH,
                 Dimensions.CORNER_RADIUS,
@@ -56,10 +62,10 @@ class GameScene : Scene() {
             alignLeftToLeftOf(boardRect)
             alignTopToTopOf(root, Dimensions.TITLE_MARGIN)
         }.also {
-            text(Strings.TITLE, Dimensions.LARGE_FONT, Colors.WHITE, font).centerOn(it)
+            text(Strings.TITLE, Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT).centerOn(it)
         }
 
-        val hiscoreRect = roundRect(
+        hiscoreRect = roundRect(
                 scoreWidth,
                 Dimensions.SCORE_HEIGHT,
                 Dimensions.CORNER_RADIUS,
@@ -68,15 +74,15 @@ class GameScene : Scene() {
             alignRightToRightOf(boardRect)
             alignTopToTopOf(titleRect)
         }.also {
-            text(Strings.HISCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, font)
+            text(Strings.HISCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, GameConfig.FONT)
                     .centerXOn(it)
                     .alignTopToTopOf(it, Dimensions.SCORE_PADDING)
-            text("0", Dimensions.LARGE_FONT, Colors.WHITE, font)
+            text("0", Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT)
                     .centerXOn(it)
                     .alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
         }
 
-        val scoreRect = roundRect(
+        scoreRect = roundRect(
                 scoreWidth,
                 Dimensions.SCORE_HEIGHT,
                 Dimensions.CORNER_RADIUS,
@@ -85,18 +91,15 @@ class GameScene : Scene() {
             alignRightToLeftOf(hiscoreRect, Dimensions.SCORE_MARGIN)
             alignTopToTopOf(titleRect)
         }.also {
-            text(Strings.SCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, font)
+            text(Strings.SCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, GameConfig.FONT)
                     .centerXOn(it)
                     .alignTopToTopOf(it, Dimensions.SCORE_PADDING)
-            text("0", Dimensions.LARGE_FONT, Colors.WHITE, font)
+            text("0", Dimensions.LARGE_FONT, Colors.WHITE, GameConfig.FONT)
                     .centerXOn(it)
                     .alignBottomToBottomOf(it, Dimensions.SCORE_PADDING)
         }
 
-        val buttonWidth = Dimensions.BUTTON_WIDTH
-        val buttonImageWidth = buttonWidth * 0.8
-
-        val restartButton = container {
+        restartButton = container {
             val buttonRect = roundRect(buttonWidth, buttonWidth, Dimensions.CORNER_RADIUS, color = GameColors.UI_BACKGROUND)
 
             image(GameConfig.RESTART_IMAGE_FILE.readBitmap()) {
@@ -108,7 +111,7 @@ class GameScene : Scene() {
             alignRightToRightOf(hiscoreRect)
         }
 
-        val undoButton = container {
+        undoButton = container {
             val buttonRect = roundRect(buttonWidth, buttonWidth, Dimensions.CORNER_RADIUS, color = GameColors.UI_BACKGROUND)
 
             image(GameConfig.UNDO_IMAGE_FILE.readBitmap()) {
