@@ -4,7 +4,9 @@ import com.soywiz.klock.seconds
 import com.soywiz.korev.Key
 import com.soywiz.korge.animate.Animator
 import com.soywiz.korge.animate.animateSequence
+import com.soywiz.korge.input.SwipeDirection
 import com.soywiz.korge.input.onKeyDown
+import com.soywiz.korge.input.onSwipe
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.tween.*
 import com.soywiz.korge.view.*
@@ -177,12 +179,24 @@ class GameScene : Scene() {
 
     private fun setupInput() {
         with (root) {
-            onKeyDown {
-                val moveDirection = when (it.key) {
+            onKeyDown { event ->
+                when (event.key) {
                     Key.UP -> Up
                     Key.DOWN -> Down
                     Key.LEFT -> Left
-                    else -> Right
+                    Key.RIGHT -> Right
+                    else -> null
+                }?.let { direction ->
+                    moveBlocks(direction)
+                }
+            }
+
+            onSwipe(GameConfig.SWIPE_THRESHOLD) {
+                val moveDirection = when (it.direction) {
+                    SwipeDirection.TOP ->  Up
+                    SwipeDirection.BOTTOM -> Down
+                    SwipeDirection.LEFT -> Left
+                    SwipeDirection.RIGHT -> Right
                 }
 
                 moveBlocks(moveDirection)

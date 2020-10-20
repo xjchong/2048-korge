@@ -10,6 +10,8 @@ object GameConfig {
 
     const val BOARD_WIDTH_IN_CELLS = 4
 
+    const val SWIPE_THRESHOLD = 20.0
+
     val MOVE_DURATION = 0.1.seconds
     val MERGE_DURATION = 0.04.seconds
 
