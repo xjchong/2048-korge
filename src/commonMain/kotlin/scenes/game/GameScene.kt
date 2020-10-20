@@ -1,4 +1,4 @@
-package scenes
+package scenes.game
 
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
@@ -9,6 +9,8 @@ import constants.Dimensions
 import constants.GameColors
 import constants.GameConfig
 import constants.Strings
+import models.BoardPosition
+import views.BlockView
 
 class GameScene : Scene() {
 
@@ -18,6 +20,8 @@ class GameScene : Scene() {
     private lateinit var undoButton: Container
     private lateinit var restartButton: Container
     private lateinit var boardRect: RoundRect
+
+    private val board = Board()
 
     override suspend fun Container.sceneInit() {
         GameConfig.init()
@@ -122,5 +126,23 @@ class GameScene : Scene() {
             alignTopToTopOf(restartButton)
             alignRightToLeftOf(restartButton, Dimensions.BUTTON_SPACING)
         }
+
+        createNewBlock(2, BoardPosition(0, 2))
+    }
+
+    private fun createNewBlock(number: Int, boardPosition: BoardPosition) {
+        board.blocks[boardPosition] = BlockView(number).addTo(root).position(boardPosition)
+    }
+
+    private fun BlockView.position(boardPosition: BoardPosition): BlockView {
+        val nextX = with (Dimensions) {
+            boardRect.x + CELL_SPACING + (CELL_WIDTH + CELL_SPACING) * boardPosition.x
+        }
+
+        val nextY = with (Dimensions) {
+            boardRect.y + CELL_SPACING + (CELL_WIDTH + CELL_SPACING) * boardPosition.y
+        }
+
+        return position(nextX, nextY)
     }
 }
