@@ -12,6 +12,8 @@ object GameConfig {
 
     const val SWIPE_THRESHOLD = 20.0
 
+    const val STORAGE_HISCORE_KEY = "hiscore"
+
     val MOVE_DURATION = 0.1.seconds
     val MERGE_DURATION = 0.04.seconds
 

@@ -9,6 +9,7 @@ import com.soywiz.korge.input.onClick
 import com.soywiz.korge.input.onKeyDown
 import com.soywiz.korge.input.onSwipe
 import com.soywiz.korge.scene.Scene
+import com.soywiz.korge.service.storage.storage
 import com.soywiz.korge.tween.*
 import com.soywiz.korge.ui.TextFormat
 import com.soywiz.korge.ui.TextSkin
@@ -111,12 +112,15 @@ class GameScene : Scene() {
     }
 
     private fun setupScoreUI() {
-        score.observe { value ->
-            if (value > hiscore.value) hiscore.update(value)
+        val storage = views.storage
+
+        hiscore.run {
+            update(storage.getOrNull(GameConfig.STORAGE_HISCORE_KEY)?.toInt() ?: 0)
+            observe { storage[GameConfig.STORAGE_HISCORE_KEY] = it.toString() }
         }
 
-        hiscore.observe {
-            // TODO: Update in storage.
+        score.observe { value ->
+            if (value > hiscore.value) hiscore.update(value)
         }
 
         with (root) {
