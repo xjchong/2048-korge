@@ -93,7 +93,7 @@ class GameScene : Scene() {
     private fun setupTitleUI() {
         with (root) {
             titleRect = roundRect(
-                    Dimensions.CELL_WIDTH,
+                    Dimensions.CELL_WIDTH + (Dimensions.CELL_SPACING * 2),
                     Dimensions.CELL_WIDTH,
                     Dimensions.CORNER_RADIUS,
                     color = GameColors.TITLE_BACKGROUND
@@ -145,7 +145,7 @@ class GameScene : Scene() {
                     Dimensions.CORNER_RADIUS,
                     color = GameColors.UI_BACKGROUND
             ) {
-                alignRightToLeftOf(hiscoreRect, Dimensions.SCORE_MARGIN)
+                centerXBetween(titleRect.x + titleRect.width, hiscoreRect.x)
                 alignTopToTopOf(titleRect)
             }.also {
                 text(Strings.SCORE_TITLE, Dimensions.SMALL_FONT, Colors.WHITE, GameConfig.FONT)
