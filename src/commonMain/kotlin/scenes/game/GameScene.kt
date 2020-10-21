@@ -21,10 +21,7 @@ import com.soywiz.korio.async.ObservableProperty
 import com.soywiz.korio.async.launchImmediately
 import com.soywiz.korma.geom.vector.roundRect
 import com.soywiz.korma.interpolation.Easing
-import constants.Dimensions
-import constants.GameColors
-import constants.GameConfig
-import constants.Strings
+import constants.*
 import models.*
 import views.BlockView
 import kotlin.random.Random
@@ -50,6 +47,7 @@ class GameScene : Scene() {
 
     override suspend fun Container.sceneInit() {
         GameConfig.init()
+        GameSound.init()
 
         setupUI()
         setupInput()
@@ -292,9 +290,13 @@ class GameScene : Scene() {
         } + score.value)
 
         if (resultingBoard.numberMap == board.numberMap) {
+            GameSound.play(GameSound.NO_MOVE_SOUND)
+
             return
         } else {
             isAnimating = true
+            GameSound.play(GameSound.MOVE_SOUND)
+
             root.animateMove(moveChanges) {
                 board = resultingBoard
                 addRandomBlock()
@@ -348,6 +350,7 @@ class GameScene : Scene() {
         score.update(0)
 
         addRandomBlock()
+        GameSound.play(GameSound.RESTART_SOUND)
     }
 
     private fun Container.animateMove(
