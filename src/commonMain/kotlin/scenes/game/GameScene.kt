@@ -1,5 +1,6 @@
 package scenes.game
 
+import com.soywiz.korau.sound.NativeSound
 import com.soywiz.korev.Key
 import com.soywiz.korge.animate.Animator
 import com.soywiz.korge.animate.animateSequence
@@ -31,7 +32,7 @@ class GameScene : Scene() {
     private lateinit var titleRect: RoundRect
     private lateinit var hiscoreRect: RoundRect
     private lateinit var scoreRect: RoundRect
-    private lateinit var undoButton: Container
+    private lateinit var soundButton: Container
     private lateinit var restartButton: Container
     private lateinit var boardRect: RoundRect
 
@@ -40,6 +41,7 @@ class GameScene : Scene() {
 
     private val score = ObservableProperty(0)
     private val hiscore = ObservableProperty(0)
+    private val isSoundOn = ObservableProperty(true)
 
     private val blocks = mutableMapOf<BoardPosition, BlockView?>()
     private val scoreWidth = (Dimensions.SCREEN_WIDTH - (4 * Dimensions.BOARD_MARGIN) - Dimensions.TITLE_WIDTH) / 2
@@ -174,6 +176,11 @@ class GameScene : Scene() {
     private suspend fun setupButtonUI() {
         val buttonImageWidth = Dimensions.BUTTON_WIDTH * 0.8
 
+        isSoundOn.run {
+            update(views.storage.getOrNull(GameConfig.STORAGE_SOUND_KEY)?.toBoolean() ?: true)
+            observe { views.storage[GameConfig.STORAGE_SOUND_KEY] = it.toString() }
+        }
+
         with (root) {
             restartButton = container {
                 val buttonRect = roundRect(
@@ -193,21 +200,37 @@ class GameScene : Scene() {
                 onClick { restart() }
             }
 
-//            undoButton = container {
-//                val buttonRect = roundRect(
-//                        Dimensions.BUTTON_WIDTH,
-//                        Dimensions.BUTTON_WIDTH,
-//                        Dimensions.CORNER_RADIUS,
-//                        color = GameColors.UI_BACKGROUND)
-//
-//                image(GameConfig.UNDO_IMAGE_FILE.readBitmap()) {
-//                    size(buttonImageWidth, buttonImageWidth)
-//                    centerOn(buttonRect)
-//                }
-//
-//                alignTopToTopOf(restartButton)
-//                alignRightToLeftOf(restartButton, Dimensions.BUTTON_SPACING)
-//            }
+            soundButton = container {
+                val buttonRect = roundRect(
+                        Dimensions.BUTTON_WIDTH,
+                        Dimensions.BUTTON_WIDTH,
+                        Dimensions.CORNER_RADIUS,
+                        color = GameColors.UI_BACKGROUND)
+
+                val soundOnImage = image(GameConfig.SOUND_ON_IMAGE.readBitmap()) {
+                    size(buttonImageWidth, buttonImageWidth)
+                    centerOn(buttonRect)
+                    visible = isSoundOn.value
+                }
+
+                val soundOffImage = image(GameConfig.SOUND_OFF_IMAGE.readBitmap()) {
+                    size(buttonImageWidth, buttonImageWidth)
+                    centerOn(buttonRect)
+                    visible = !isSoundOn.value
+                }
+
+                alignTopToTopOf(restartButton)
+                alignRightToLeftOf(restartButton, Dimensions.BUTTON_SPACING)
+
+                onClick {
+                    isSoundOn.update(!isSoundOn.value)
+                }
+
+                isSoundOn.observe { value ->
+                    soundOnImage.visible = value
+                    soundOffImage.visible = !value
+                }
+            }
         }
     }
 
@@ -290,12 +313,13 @@ class GameScene : Scene() {
         } + score.value)
 
         if (resultingBoard.numberMap == board.numberMap) {
-            GameSound.play(GameSound.NO_MOVE_SOUND)
+            playSound(GameSound.NO_MOVE_SOUND)
 
             return
         } else {
             isAnimating = true
-            GameSound.play(GameSound.MOVE_SOUND)
+
+            playSound(GameSound.MOVE_SOUND)
 
             root.animateMove(moveChanges) {
                 board = resultingBoard
@@ -350,7 +374,7 @@ class GameScene : Scene() {
         score.update(0)
 
         addRandomBlock()
-        GameSound.play(GameSound.RESTART_SOUND)
+        playSound(GameSound.RESTART_SOUND)
     }
 
     private fun Container.animateMove(
@@ -422,5 +446,11 @@ class GameScene : Scene() {
                 time = GameConfig.MERGE_DURATION,
                 easing = Easing.LINEAR
         )
+    }
+
+    private fun playSound(sound: NativeSound) {
+        if (!isSoundOn.value) return
+
+        GameSound.play(sound)
     }
 }

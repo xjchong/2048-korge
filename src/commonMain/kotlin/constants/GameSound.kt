@@ -15,7 +15,7 @@ object GameSound {
 
     var RESTART_SOUND: NativeSound by Delegates.notNull()
         private set
-    
+
     private const val DEFAULT_VOLUME = 0.4
 
     suspend fun init() {
