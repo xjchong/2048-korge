@@ -193,21 +193,21 @@ class GameScene : Scene() {
                 onClick { restart() }
             }
 
-            undoButton = container {
-                val buttonRect = roundRect(
-                        Dimensions.BUTTON_WIDTH,
-                        Dimensions.BUTTON_WIDTH,
-                        Dimensions.CORNER_RADIUS,
-                        color = GameColors.UI_BACKGROUND)
-
-                image(GameConfig.UNDO_IMAGE_FILE.readBitmap()) {
-                    size(buttonImageWidth, buttonImageWidth)
-                    centerOn(buttonRect)
-                }
-
-                alignTopToTopOf(restartButton)
-                alignRightToLeftOf(restartButton, Dimensions.BUTTON_SPACING)
-            }
+//            undoButton = container {
+//                val buttonRect = roundRect(
+//                        Dimensions.BUTTON_WIDTH,
+//                        Dimensions.BUTTON_WIDTH,
+//                        Dimensions.CORNER_RADIUS,
+//                        color = GameColors.UI_BACKGROUND)
+//
+//                image(GameConfig.UNDO_IMAGE_FILE.readBitmap()) {
+//                    size(buttonImageWidth, buttonImageWidth)
+//                    centerOn(buttonRect)
+//                }
+//
+//                alignTopToTopOf(restartButton)
+//                alignRightToLeftOf(restartButton, Dimensions.BUTTON_SPACING)
+//            }
         }
     }
 

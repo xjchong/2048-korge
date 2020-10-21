@@ -5,11 +5,13 @@ import com.soywiz.korim.color.RGBA
 
 object GameColors {
 
+    val CELL_2048 = RGBA(256, 194, 46)
+
     val SCREEN_BACKGROUND = Colors["#f5edd7"]
     val UI_BACKGROUND = Colors["#b9aea0"]
     val BOARD_BACKGROUND = Colors["#b9aea0"]
     val EMPTY_CELL_BACKGROUND = Colors["#cec0b2"]
-    val TITLE_BACKGROUND = Colors["#edc403"]
+    val TITLE_BACKGROUND = CELL_2048
     val OVERLAY_BACKGROUND = Colors["#00000077"]
 
     val TEXT_HIGHLIGHT = RGBA(230, 230, 230)
@@ -25,7 +27,6 @@ object GameColors {
     val CELL_256 = RGBA(240, 212, 121)
     val CELL_512 = RGBA(244, 206, 96)
     val CELL_1024 = RGBA(248, 200, 71)
-    val CELL_2048 = RGBA(256, 194, 46)
     val CELL_4096 = RGBA(256, 194, 46)
     val CELL_8192 = RGBA(256, 194, 46)
     val CELL_16384 = RGBA(256, 194, 46)
