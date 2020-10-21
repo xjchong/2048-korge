@@ -18,6 +18,7 @@ object GameConfig {
 
     val MOVE_DURATION = 0.1.seconds
     val MERGE_DURATION = 0.04.seconds
+    val ADD_BLOCK_DURATION = 0.04.seconds
 
     val RESTART_IMAGE_FILE = resourcesVfs["restart.png"]
     val SOUND_ON_IMAGE = resourcesVfs["sound_on.png"]

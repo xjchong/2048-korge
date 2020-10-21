@@ -265,14 +265,26 @@ class GameScene : Scene() {
         val randomPosition = board.numberMap.filter { it.value == null }.keys.shuffled().firstOrNull() ?: return false
         val randomNumber = if (Random.nextDouble() < 0.9) 2 else 4
 
-        addBlock(randomPosition, randomNumber)
+        addBlock(randomPosition, randomNumber, shouldAnimateIn = true)
 
         return true
     }
 
-    private fun addBlock(boardPosition: BoardPosition, number: Int) {
-        blocks[boardPosition] = BlockView(number).addTo(root).position(boardPosition)
+    private fun addBlock(boardPosition: BoardPosition, number: Int, shouldAnimateIn: Boolean = false) {
+        val blockView = BlockView(number).addTo(root).position(boardPosition).also {
+            if (shouldAnimateIn) {
+                it.scale = 0.0
+                it.x += Dimensions.CELL_WIDTH / 2
+                it.y += Dimensions.CELL_WIDTH / 2
+            }
+        }
+
+        blocks[boardPosition] = blockView
         board.numberMap[boardPosition] = number
+
+        if (shouldAnimateIn) {
+            root.animateAddBlock(blockView)
+        }
     }
 
     private fun getScreenPosition(boardPosition: BoardPosition): Pair<Double, Double> {
@@ -444,6 +456,19 @@ class GameScene : Scene() {
                 blockView::y[y],
                 blockView::scale[scale],
                 time = GameConfig.MERGE_DURATION,
+                easing = Easing.LINEAR
+        )
+    }
+
+    private fun Container.animateAddBlock(blockView: BlockView) = launchImmediately {
+        val x = blockView.x
+        val y = blockView.y
+
+        tween(
+                blockView::scale[1.0],
+                blockView::x[x - (Dimensions.CELL_WIDTH / 2)],
+                blockView::y[y - (Dimensions.CELL_WIDTH / 2)],
+                time = GameConfig.ADD_BLOCK_DURATION,
                 easing = Easing.LINEAR
         )
     }
