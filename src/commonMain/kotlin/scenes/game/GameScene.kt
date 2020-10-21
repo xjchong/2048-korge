@@ -1,14 +1,18 @@
 package scenes.game
 
-import com.soywiz.klock.seconds
 import com.soywiz.korev.Key
 import com.soywiz.korge.animate.Animator
 import com.soywiz.korge.animate.animateSequence
+import com.soywiz.korge.html.Html
 import com.soywiz.korge.input.SwipeDirection
+import com.soywiz.korge.input.onClick
 import com.soywiz.korge.input.onKeyDown
 import com.soywiz.korge.input.onSwipe
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.tween.*
+import com.soywiz.korge.ui.TextFormat
+import com.soywiz.korge.ui.TextSkin
+import com.soywiz.korge.ui.uiText
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.format.readBitmap
@@ -181,6 +185,8 @@ class GameScene : Scene() {
 
                 alignTopToBottomOf(hiscoreRect, Dimensions.BUTTON_MARGIN_TOP)
                 alignRightToRightOf(hiscoreRect)
+
+                onClick { restart() }
             }
 
             undoButton = container {
@@ -262,7 +268,12 @@ class GameScene : Scene() {
 
     private fun moveBlocks(direction: MoveDirection) {
         if (isAnimating) return
-        if (!board.hasMovesRemaining) return
+
+        if (!board.hasMovesRemaining) {
+            root.showGameOver { restart() }
+
+            return
+        }
 
         val moveChanges = board.calculateMove(direction)
         val resultingBoard = moveChanges.resultingBoard
@@ -285,6 +296,52 @@ class GameScene : Scene() {
                 isAnimating = false
             }
         }
+    }
+
+    private fun Container.showGameOver(onRestart: () -> Unit) = container {
+        val textFormat = TextFormat(
+                color = Colors.WHITE,
+                size = Dimensions.LARGE_FONT.toInt(),
+                font = Html.FontFace.Bitmap(GameConfig.FONT))
+
+        val textSkin = TextSkin(
+                normal = textFormat,
+                over = textFormat.copy(color = GameColors.TEXT_HIGHLIGHT),
+                down = textFormat.copy(color = GameColors.TEXT_SELECT))
+
+        fun triggerRestart() {
+            this@container.removeFromParent()
+            onRestart()
+        }
+
+        position(boardRect.x, boardRect.y)
+        roundRect(boardRect.width, boardRect.height, Dimensions.CORNER_RADIUS, color = GameColors.OVERLAY_BACKGROUND)
+
+        text(Strings.GAME_OVER_TITLE, 60.0, Colors.WHITE, GameConfig.FONT) {
+            centerBetween(0.0, 0.0, boardRect.width, boardRect.height)
+            y -= 60
+        }
+
+        uiText(Strings.RESTART_CTA_TITLE, boardRect.width, skin = textSkin) {
+            centerBetween(0.0, 0.0, boardRect.width, boardRect.height)
+            y += 20
+            onClick { triggerRestart() }
+        }
+
+        onKeyDown {
+            if (it.key == Key.ENTER || it.key == Key.SPACE) {
+                triggerRestart()
+            }
+        }
+    }
+
+    private fun restart() {
+        board = Board()
+        blocks.values.forEach { it?.removeFromParent() }
+        blocks.clear()
+        score.update(0)
+
+        addRandomBlock()
     }
 
     private fun Container.animateMove(

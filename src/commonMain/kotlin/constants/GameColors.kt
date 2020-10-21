@@ -10,6 +10,10 @@ object GameColors {
     val BOARD_BACKGROUND = Colors["#b9aea0"]
     val EMPTY_CELL_BACKGROUND = Colors["#cec0b2"]
     val TITLE_BACKGROUND = Colors["#edc403"]
+    val OVERLAY_BACKGROUND = Colors["#00000077"]
+
+    val TEXT_HIGHLIGHT = RGBA(230, 230, 230)
+    val TEXT_SELECT = RGBA(190, 190, 190)
 
     val CELL_2 = RGBA(240, 228, 218)
     val CELL_4 = RGBA(236, 224, 201)
