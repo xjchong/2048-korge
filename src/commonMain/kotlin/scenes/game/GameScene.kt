@@ -143,6 +143,7 @@ class GameScene : Scene() {
 
                     hiscore.observe { value ->
                         text = value.toString()
+                        centerXOn(it)
                     }
                 }
             }
@@ -165,6 +166,7 @@ class GameScene : Scene() {
 
                     score.observe { value ->
                         text = value.toString()
+                        centerXOn(it)
                     }
                 }
             }
